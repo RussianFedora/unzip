@@ -1,10 +1,10 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
-Version: 5.42
+Version: 5.50
 Release: 1
 License: BSD
 Group: Applications/Archiving
-Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip542.tar.gz
+Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
 Patch0: unzip542-rpmoptflags.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -43,6 +43,15 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Wed Mar 13 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-1
+- 5.50
+
+* Thu Feb 21 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.42-3
+- Rebuild
+
+* Wed Jan 09 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
 * Mon May 21 2001 Trond Eivind Glomsrød <teg@redhat.com>
 - 5.42
 - Don't strip binaries explicitly
