@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.50
-Release: 1
+Release: 2
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
@@ -26,12 +26,12 @@ a zip archive.
 ln -s unix/Makefile Makefile
 
 %build
-make linux_noasm
+make linux_noasm LF2=""
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make prefix=$RPM_BUILD_ROOT/usr MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 install
+make prefix=$RPM_BUILD_ROOT/usr MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 install LF2=""
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Apr  2 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-2
+- Make it not strip
+
 * Wed Mar 13 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-1
 - 5.50
 
