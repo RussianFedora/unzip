@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.51
-Release: 1.1
+Release: 2
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
@@ -43,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Jun 08 2004 Lon Hohberger <lhh@redhat.com> 5.51-2
+- Rebuild
+
 * Tue Jun 08 2004 Lon Hohberger <lhh@redhat.com> 5.51-1.1
 - Update to 5.51; remove dotdot patch.
 
