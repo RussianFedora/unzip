@@ -1,11 +1,12 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.50
-Release: 7
+Release: 14
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
 Patch0: unzip542-rpmoptflags.patch
+Patch1: unzip-5.50-dotdot.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -23,6 +24,7 @@ a zip archive.
 %prep
 %setup -q 
 %patch0 -p1
+%patch1 -p1
 ln -s unix/Makefile Makefile
 
 %build
@@ -43,6 +45,28 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-14
+- Rebuilt: Red Hat Linux 9
+
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-13
+- Rebuilt: Red Hat Enterprise Linux 2.1
+
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-12
+- Rebuilt Red Hat Linux 8.0
+
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-11
+- Rebuilt Red Hat Linux 7.3
+
+* Wed Jun 11 2003 Lon Hohberger <lhh@redhat.com> 5.50-10
+- Rebuilt
+
+* Wed Jun 11 2003 Lon Hohberger <lhh@redhat.com> 5.50-9
+- SECURITY: Scour start of filename for ../ patterns which
+include quote and/or control characters.
+
+* Wed Jun 04 2003 Elliot Lee <sopwith@redhat.com>
+- rebuilt
+
 * Wed Jan 22 2003 Tim Powers <timp@redhat.com>
 - rebuilt
 
