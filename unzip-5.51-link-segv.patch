@@ -1,8 +1,12 @@
-diff -ur unzip-5.51/unix/unix.c unzip-5.51-lhh/unix/unix.c
---- unzip-5.51/unix/unix.c	2004-04-11 20:29:58.000000000 -0400
-+++ unzip-5.51-lhh/unix/unix.c	2004-11-22 14:34:21.468981000 -0500
-@@ -1052,7 +1052,9 @@
-             fclose(G.outfile);
+--- unzip-5.51/unix/unix.c.mmm	2004-04-12 02:29:58.000000000 +0200
++++ unzip-5.51/unix/unix.c	2005-02-03 14:59:46.280095080 +0100
+@@ -1049,10 +1049,13 @@
+               "warning:  symbolic link (%s) failed\n",
+               FnFilter1(G.filename)));
+             free(slnk_entry);
+-            fclose(G.outfile);
++	    if (G.outfile)
++	        fclose(G.outfile);
              return;
          }
 -        fclose(G.outfile);                  /* close "link" file for good... */

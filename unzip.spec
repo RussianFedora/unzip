@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.51
-Release: 6
+Release: 7
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
@@ -24,9 +24,9 @@ a zip archive.
 
 %prep
 %setup -q 
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
+%patch0 -p1 -b .rpmo
+%patch1 -p1 -b .4GB
+%patch2 -p1 -b .link-segv
 ln -s unix/Makefile Makefile
 
 %build
@@ -47,6 +47,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Thu Feb 03 2005 Ivana Varekova <varekova@redhat.com> 5.51-7
+- fix segfault with unpacking of zipfiles containing dangling symlinks
+  (bug #134073)
+
 * Thu Dec 02 2004 Lon Hohberger <lhh@redhat.com> 5.51-6
 - Rebuild
 
