@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.50
-Release: 20
+Release: 27
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
@@ -45,6 +45,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Wed Jul 30 2003 Lon Hohberger <lhh@redhat.com> 5.50-27
+- Rebuild for 9
+
+* Wed Jul 30 2003 Lon Hohberger <lhh@redhat.com> 5.50-26
+- Rebuild for 8.0
+
+* Tue Jul 22 2003 Lon Hohberger <lhh@redhat.com> 5.50-23
+- Rebuild for 7.3
+
+* Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-22
+- Rebuild for Severn
+
+* Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-21
+- Rebuild
+
 * Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-20
 - Rebuild for 9
 
