@@ -1,12 +1,12 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.50
-Release: 14
+Release: 20
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
 Patch0: unzip542-rpmoptflags.patch
-Patch1: unzip-5.50-dotdot.patch
+Patch1: unzip-5.50-slash-dotdot.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -45,6 +45,27 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-20
+- Rebuild for 9
+
+* Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-19
+- Rebuild for 8.0
+
+* Mon Jul 21 2003 Lon Hohberger <lhh@redhat.com> 5.50-18
+- SECURITY: Incorporate far cleaner patch from Ben Laurie
+<ben@algroup.co.uk> which also fixes ^V/ (quote-slash).
+Patch checks post-decode as opposed to inline as previous
+patch does.
+
+* Mon Jun 16 2003 Lon Hohberger <lhh@redhat.com> 5.50-17
+- Rebuilt per request
+
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-16
+- Rebuilt
+
+* Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-15
+- Rebuilt
+
 * Thu Jun 12 2003 Lon Hohberger <lhh@redhat.com> 5.50-14
 - Rebuilt: Red Hat Linux 9
 
