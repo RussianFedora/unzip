@@ -1,12 +1,13 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
-Version: 5.41
-Release: 4
-Copyright: BSD
+Version: 5.42
+Release: 1
+License: BSD
 Group: Applications/Archiving
-Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip541.tar.gz
-URL: ftp://ftp.info-zip.org/pub/infozip/UnZip.html
-BuildRoot: /var/tmp/unzip-root
+Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip542.tar.gz
+Patch0: unzip542-rpmoptflags.patch
+URL: http://www.info-zip.org/pub/infozip/UnZip.html
+BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -21,35 +22,38 @@ a zip archive.
 
 %prep
 %setup -q 
+%patch0 -p1
 ln -s unix/Makefile Makefile
 
 %build
-%ifarch i386
-make linux
-%else
 make linux_noasm
-%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
 make prefix=$RPM_BUILD_ROOT/usr MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 install
 
-strip $RPM_BUILD_ROOT/usr/bin/{unzip,funzip,unzipsfx}
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc README BUGS COPYING INSTALL
-/usr/bin/unzip
-/usr/bin/funzip
-/usr/bin/unzipsfx
-/usr/bin/zipinfo
-%{_mandir}/man1/*
+%doc README BUGS LICENSE INSTALL
+/usr/bin/*
+%{_mandir}/*/*
 
 %changelog
+* Mon May 21 2001 Trond Eivind Glomsrød <teg@redhat.com>
+- 5.42
+- Don't strip binaries explicitly
+- build without assembly, it doesn't seem to increase performance 
+- make it respect RPM_OPT_FLAGS, define _GNU_SOURCE
+- use %%{_tmppath}
+- "License:" replaces "Copyright:"
+- Update URL
+- include zipgrep
+- COPYING doesn't exist anymore, include LICENSE instead
+
 * Thu Jul 13 2000 Prospector <bugzilla@redhat.com>
 - automatic rebuild
 
