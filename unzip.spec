@@ -1,12 +1,11 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
-Version: 5.50
-Release: 37
+Version: 5.51
+Release: 1.1
 License: BSD
 Group: Applications/Archiving
-Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip550.tar.gz
+Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
 Patch0: unzip542-rpmoptflags.patch
-Patch1: unzip-5.50-dotdot.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -24,7 +23,6 @@ a zip archive.
 %prep
 %setup -q 
 %patch0 -p1
-%patch1 -p1
 ln -s unix/Makefile Makefile
 
 %build
@@ -45,6 +43,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Jun 08 2004 Lon Hohberger <lhh@redhat.com> 5.51-1.1
+- Update to 5.51; remove dotdot patch.
+
 * Fri Feb 13 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
