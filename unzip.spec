@@ -1,11 +1,12 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.51
-Release: 3
+Release: 4
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
 Patch0: unzip542-rpmoptflags.patch
+Patch1: unzip-5.51-near-4GB.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -23,10 +24,11 @@ a zip archive.
 %prep
 %setup -q 
 %patch0 -p1
+%patch1 -p1
 ln -s unix/Makefile Makefile
 
 %build
-make linux_noasm LF2=""
+make CFLAGS="-D_LARGEFILE64_SOURCE" linux_noasm LF2=""
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -43,6 +45,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Jun 21 2004 Lon Hohberger <lhh@redhat.com> 5.51-4
+- Extend max file/archive size to 2^32-8193 (4294959103) bytes
+
 * Tue Jun 15 2004 Elliot Lee <sopwith@redhat.com>
 - rebuilt
 
