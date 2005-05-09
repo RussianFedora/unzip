@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.51
-Release: 10
+Release: 11
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
@@ -51,6 +51,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon May  9 2005 Ivana Varekova <varekova@redhat.com> 5.51-11
+- fix bug 156959 – invalid file mode on created files 
+
 * Mon Mar  7 2005 Ivana Varekova <varekova@redhat.com> 5.51-10
 - rebuilt
 
