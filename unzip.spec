@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.51
-Release: 11
+Release: 12
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
@@ -10,6 +10,7 @@ Patch1: unzip-5.51-near-4GB.patch
 Patch2: unzip-5.51-link-segv.patch
 Patch3: unzip-5.51-link-segv2.patch
 Patch4: unzip-5.51-link-segv3.patch
+Patch5: unzip-5.51-toctou.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -31,6 +32,7 @@ a zip archive.
 %patch2 -p1 -b .link-segv
 %patch3 -p1 -b .morn
 %patch4 -p1 -b .morn2
+%patch5 -p1 -b .toctou
 ln -s unix/Makefile Makefile
 
 %build
@@ -51,6 +53,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Wed Aug  3 2005 Ivana Varekova <varekova@redhat.com> 5.51-12
+- fix bug 164928 - TOCTOU issue in unzip
+
 * Mon May  9 2005 Ivana Varekova <varekova@redhat.com> 5.51-11
 - fix bug 156959 – invalid file mode on created files 
 
