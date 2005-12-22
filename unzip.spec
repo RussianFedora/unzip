@@ -1,16 +1,15 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
-Version: 5.51
-Release: 12.1
+Version: 5.52
+Release: 1
 License: BSD
 Group: Applications/Archiving
-Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip551.tar.gz
+Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
 Patch0: unzip542-rpmoptflags.patch
-Patch1: unzip-5.51-near-4GB.patch
 Patch2: unzip-5.51-link-segv.patch
 Patch3: unzip-5.51-link-segv2.patch
-Patch4: unzip-5.51-link-segv3.patch
-Patch5: unzip-5.51-toctou.patch
+Patch6: unzip-5.52-toctou.patch
+Patch7: unzip-5.52-near-4GB.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 
@@ -28,11 +27,10 @@ a zip archive.
 %prep
 %setup -q 
 %patch0 -p1 -b .rpmo
-%patch1 -p1 -b .4GB
 %patch2 -p1 -b .link-segv
 %patch3 -p1 -b .morn
-%patch4 -p1 -b .morn2
-%patch5 -p1 -b .toctou
+%patch6 -p1 -b .toctou
+%patch7 -p1 -b .4GB
 ln -s unix/Makefile Makefile
 
 %build
@@ -53,6 +51,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Thu Dec 22 2005 Ivana Varekova <vraekova@redhat.com> 5.52-1
+- update to 5.52
+
 * Fri Dec 09 2005 Jesse Keating <jkeating@redhat.com>
 - rebuilt
 
