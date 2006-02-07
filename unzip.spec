@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files.
 Name: unzip
 Version: 5.52
-Release: 2
+Release: 2.1
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -55,6 +55,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Feb 07 2006 Jesse Keating <jkeating@redhat.com> - 5.52-2.1
+- rebuilt for new gcc4.1 snapshot and glibc changes
+
 * Mon Feb  6 2006 Ivana Varekova <varekova@redhat.com> 5.52-2
 - fix bug 180078 - unzip -l causing error
 - fix CVE-2005-4667 - unzip long file name buffer overflow
