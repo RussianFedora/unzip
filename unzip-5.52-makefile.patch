@@ -1,0 +1,10 @@
+--- unzip-5.52/unix/Makefile.pom	2007-02-06 12:56:35.000000000 +0100
++++ unzip-5.52/unix/Makefile	2007-02-06 12:57:06.000000000 +0100
+@@ -415,7 +415,6 @@
+ unix_make:
+ #	@echo\
+ # '(Ignore any errors from `make'"' due to the following command; it's harmless.)"
+-	-@2>&1 $(LN) unix/Makefile . > /dev/null || echo > /dev/null
+ 
+ # this really only works for Unix targets, unless E and O specified on cmd line
+ clean:

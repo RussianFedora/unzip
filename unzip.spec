@@ -1,7 +1,7 @@
-Summary: A utility for unpacking zip files.
+Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 2.2.1
+Release: 3%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -12,8 +12,9 @@ Patch6: unzip-5.52-toctou.patch
 Patch7: unzip-5.52-near-4GB.patch
 Patch8: unzip-5.52-near-4GB2.patch
 Patch9: unzip-5.52-long-filename.patch
+Patch10: unzip-5.52-makefile.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -35,15 +36,16 @@ a zip archive.
 %patch7 -p1 -b .4GB
 %patch8 -p1 -b .4GB2
 %patch9 -p1 -b .lfn
+%patch10 -p1 -b .make
 ln -s unix/Makefile Makefile
 
 %build
-make CFLAGS="-D_LARGEFILE64_SOURCE" linux_noasm LF2=""
+make CFLAGS="-D_LARGEFILE64_SOURCE" linux_noasm LF2="" %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 
-make prefix=$RPM_BUILD_ROOT/usr MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 install LF2=""
+make prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install LF2="" 
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,10 +53,14 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 %doc README BUGS LICENSE INSTALL
-/usr/bin/*
+%{_bindir}/*
 %{_mandir}/*/*
 
 %changelog
+* Tue Feb  6 2007 Ivana Varekova <varekova@redhat.com> - 5.52-3
+- Resolves: 226516 
+  Incorporate the package review
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 5.52-2.2.1
 - rebuild
 
@@ -78,7 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 - fix bug 164928 - TOCTOU issue in unzip
 
 * Mon May  9 2005 Ivana Varekova <varekova@redhat.com> 5.51-11
-- fix bug 156959 â€“ invalid file mode on created files 
+- fix bug 156959 Ã¢â‚¬â€œ invalid file mode on created files 
 
 * Mon Mar  7 2005 Ivana Varekova <varekova@redhat.com> 5.51-10
 - rebuilt
@@ -212,22 +218,22 @@ include quote and/or control characters.
 * Thu May 23 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
-* Thu Apr 25 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-3
+* Thu Apr 25 2002 Trond Eivind GlomsrÃ¸d <teg@redhat.com> 5.50-3
 - Rebuild
 
-* Tue Apr  2 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-2
+* Tue Apr  2 2002 Trond Eivind GlomsrÃ¸d <teg@redhat.com> 5.50-2
 - Make it not strip
 
-* Wed Mar 13 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.50-1
+* Wed Mar 13 2002 Trond Eivind GlomsrÃ¸d <teg@redhat.com> 5.50-1
 - 5.50
 
-* Thu Feb 21 2002 Trond Eivind Glomsrød <teg@redhat.com> 5.42-3
+* Thu Feb 21 2002 Trond Eivind GlomsrÃ¸d <teg@redhat.com> 5.42-3
 - Rebuild
 
 * Wed Jan 09 2002 Tim Powers <timp@redhat.com>
 - automated rebuild
 
-* Mon May 21 2001 Trond Eivind Glomsrød <teg@redhat.com>
+* Mon May 21 2001 Trond Eivind GlomsrÃ¸d <teg@redhat.com>
 - 5.42
 - Don't strip binaries explicitly
 - build without assembly, it doesn't seem to increase performance 
