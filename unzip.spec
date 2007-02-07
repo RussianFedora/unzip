@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -52,11 +52,14 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc README BUGS LICENSE INSTALL
+%doc README BUGS LICENSE 
 %{_bindir}/*
 %{_mandir}/*/*
 
 %changelog
+* Wed Feb  7 2007 Ivana Varekova <varekova@redhat.com> - 5.52-4
+- incorporate the next peckage review comment  
+
 * Tue Feb  6 2007 Ivana Varekova <varekova@redhat.com> - 5.52-3
 - Resolves: 226516 
   Incorporate the package review
