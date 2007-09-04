@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -13,6 +13,7 @@ Patch7: unzip-5.52-near-4GB.patch
 Patch8: unzip-5.52-near-4GB2.patch
 Patch9: unzip-5.52-long-filename.patch
 Patch10: unzip-5.52-makefile.patch
+Patch11: unzip-5.52-open.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -37,6 +38,7 @@ a zip archive.
 %patch8 -p1 -b .4GB2
 %patch9 -p1 -b .lfn
 %patch10 -p1 -b .make
+%patch11 -p1 -b .open
 ln -s unix/Makefile Makefile
 
 %build
@@ -57,6 +59,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Tue Sep  4 2007 Ivana Varekova <varekova@redhat.com> - 5.52-5
+- fix open call
+
 * Wed Feb  7 2007 Ivana Varekova <varekova@redhat.com> - 5.52-4
 - incorporate the next peckage review comment  
 
