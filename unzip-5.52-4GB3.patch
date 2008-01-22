@@ -1,0 +1,24 @@
+diff -up unzip-5.52/globals.h.pom unzip-5.52/globals.h
+--- unzip-5.52/globals.h.pom	2008-01-22 14:54:15.000000000 +0100
++++ unzip-5.52/globals.h	2008-01-22 14:54:26.000000000 +0100
+@@ -183,7 +183,7 @@ typedef struct Globals {
+     int newzip;           /* reset in extract.c; used in crypt.c */
+     Z_OFF_T   real_ecrec_offset;
+     Z_OFF_T   expect_ecrec_offset;
+-    long csize;           /* used by decompr. (NEXTBYTE): must be signed */
++    long long csize;           /* used by decompr. (NEXTBYTE): must be signed */
+     long used_csize;      /* used by extract_or_test_member(), explode() */
+ 
+ #ifdef DLL
+diff -up unzip-5.52/process.c.pom unzip-5.52/process.c
+--- unzip-5.52/process.c.pom	2008-01-22 14:54:15.000000000 +0100
++++ unzip-5.52/process.c	2008-01-22 14:54:47.000000000 +0100
+@@ -1288,7 +1288,7 @@ int process_local_file_hdr(__G)    /* re
+         G.lrec.ucsize = G.pInfo->uncompr_size;
+     }
+ 
+-    G.csize = (long)G.lrec.csize;
++    G.csize = (long long)G.lrec.csize;
+ 
+     return PK_COOL;
+ 
