@@ -23,7 +23,7 @@
            "debug: bufstart = %ld, cur_zipfile_bufstart = %ld\n",
            (long)bufstart, (long)G.cur_zipfile_bufstart));
 -        if (request < 0) {
-+        if ((request < 0) || (request > MAX_ZIP_SIZE)) { /* >2^32-8193 */  
++        if (request > MAX_ZIP_SIZE) { /* >2^32-8193 */  
 +	    printf("retry - request = 0x%lu\n", (ulg)request);
              Info(slide, 0x401, ((char *)slide, LoadFarStringSmall(SeekMsg),
                G.zipfn, LoadFarString(ReportMsg)));
@@ -44,7 +44,7 @@
  # for any platform.  Change "-O" to "-O3" or whatever, as desired...
  linux_noasm:	unix_make
 -	$(MAKE) unzips CC=gcc LD=gcc CF="$(RPM_OPT_FLAGS) -D_GNU_SOURCE -Wall -I. $(LOC)"
-+	$(MAKE) unzips CC=gcc LD=gcc CF="$(RPM_OPT_FLAGS) -D_LARGEFILE64_SOUCRE -D_GNU_SOURCE -Wall -I. $(LOC)"
++	$(MAKE) unzips CC=gcc LD=gcc CF="$(RPM_OPT_FLAGS) -D_LARGEFILE64_SOURCE -D_GNU_SOURCE -Wall -I. $(LOC)"
  
  # Linux with lcc compiler:  __inline__ (stat.h) not recognized, and must edit
  # /usr/include/gnu/types.h to get rid of "long long" if __LCC__ defined.  -O3
@@ -178,7 +178,7 @@
      Z_OFF_T bufstart = request - inbuf_offset;
  
 -    if (request < 0) {
-+    if (request < 0) { 
++    if (request > (Z_OFF_T) MAX_ZIP_SIZE) { 
          Info(slide, 1, ((char *)slide, LoadFarStringSmall(SeekMsg),
               G.zipfn, LoadFarString(ReportMsg)));
          return(PK_BADERR);
