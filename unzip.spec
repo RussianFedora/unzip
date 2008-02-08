@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -16,6 +16,7 @@ Patch10: unzip-5.52-makefile.patch
 Patch11: unzip-5.52-open.patch
 Patch12: unzip-5.52-4GB3.patch
 Patch13: unzip-5.52-4GB_types.patch
+Patch14: unzip-5.52-249057.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -43,6 +44,7 @@ a zip archive.
 %patch11 -p1 -b .open
 %patch12 -p1 -b .4GB3
 %patch13 -p1 -b .4BG4
+%patch14 -p1 -b .err
 ln -s unix/Makefile Makefile
 
 %build
@@ -63,6 +65,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Fri Feb  8 2008 Ivana Varekova <varekova@redhat.com> - 5.52-8
+- fix output when out of space error appears
+
 * Wed Jan 23 2008 Ivana Varekova <varekova@redhat.com> - 5.52-7
 - fix another long file support problem
 

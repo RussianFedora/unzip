@@ -1,0 +1,163 @@
+diff -up unzip-5.52/unzpriv.h.err unzip-5.52/unzpriv.h
+--- unzip-5.52/unzpriv.h.err	2008-02-08 14:51:52.000000000 +0100
++++ unzip-5.52/unzpriv.h	2008-02-08 14:51:52.000000000 +0100
+@@ -2182,7 +2182,7 @@ char    *GetLoadPath     OF((__GPRO));  
+    int   SetFileSize     OF((FILE *file, ulg filesize));            /* local */
+ #endif
+ #ifndef MTS /* macro in MTS */
+-   void  close_outfile   OF((__GPRO));                              /* local */
++   int  close_outfile   OF((__GPRO));                              /* local */
+ #endif
+ #ifdef SET_SYMLINK_ATTRIBS
+    int  set_symlnk_attribs  OF((__GPRO__ slinkentry *slnk_entry));  /* local */
+diff -up unzip-5.52/unix/unix.c.err unzip-5.52/unix/unix.c
+--- unzip-5.52/unix/unix.c.err	2008-02-08 14:51:52.000000000 +0100
++++ unzip-5.52/unix/unix.c	2008-02-08 15:04:15.000000000 +0100
+@@ -1029,10 +1029,41 @@ static int get_extattribs(__G__ pzt, z_u
+ #ifndef MTS
+ 
+ /****************************/
++/* Function CloseError()    */
++/***************************/
++
++int CloseError(__G)
++    __GDEF
++{
++    int errval = PK_OK;
++    
++    if (fclose(G.outfile) < 0) {
++          switch (errno) {
++                case ENOSPC:
++                    /* Do we need this on fileio.c? */
++                    Info(slide, 0x4a1, ((char *)slide, "%s: write error (disk full?).   Continue? (y/n/^C) ",
++                          FnFilter1(G.filename)));
++                    fgets(G.answerbuf, 9, stdin);
++                    if (*G.answerbuf == 'y')     /* stop writing to this file */
++                        G.disk_full = 1;         /* pass to next */
++                    else
++                        G.disk_full = 2;         /* no: exit program */
++          
++                    errval = PK_DISK;
++                    break;
++
++                default:
++                    errval = PK_WARN;
++          }
++     }
++     return errval;
++} /* End of CloseError() */
++
++/****************************/
+ /* Function close_outfile() */
+ /****************************/
+ 
+-void close_outfile(__G)    /* GRR: change to return PK-style warning level */
++int close_outfile(__G) 
+     __GDEF
+ {
+     union {
+@@ -1041,6 +1072,7 @@ void close_outfile(__G)    /* GRR: chang
+     } zt;
+     ush z_uidgid[2];
+     int have_uidgid_flg;
++    int errval = PK_OK;
+ 
+     fchmod(fileno(G.outfile), 0400);
+     
+@@ -1054,7 +1086,14 @@ void close_outfile(__G)    /* GRR: chang
+           perror("chmod (file attributes) error");
+ #endif
+     
+-    fclose(G.outfile);
++/*---------------------------------------------------------------------------
++    Check what fclose() reports from the device, this is always safer.
++    An NFS non Solaris could be full and we could be facing ENOSPC not
++    seen by write() without opening with O_SYNC or writing with fsync().
++    - jmp.
++  ---------------------------------------------------------------------------*/
++
++    errval = CloseError(G.outfile, G.filename);
+ 
+ /*---------------------------------------------------------------------------
+     If symbolic links are supported, allocate storage for a symlink control
+@@ -1075,14 +1114,14 @@ void close_outfile(__G)    /* GRR: chang
+             Info(slide, 0x201, ((char *)slide,
+               "warning:  symbolic link (%s) failed: mem alloc overflow\n",
+               FnFilter1(G.filename)));
+-            return;
++            return PK_WARN;
+         }
+ 
+         if ((slnk_entry = (slinkentry *)malloc(slnk_entrysize)) == NULL) {
+             Info(slide, 0x201, ((char *)slide,
+               "warning:  symbolic link (%s) failed: no mem\n",
+               FnFilter1(G.filename)));
+-            return;
++            return PK_WARN;
+         }
+         slnk_entry->next = NULL;
+         slnk_entry->targetlen = ucsize;
+@@ -1102,12 +1141,12 @@ void close_outfile(__G)    /* GRR: chang
+               FnFilter1(G.filename)));
+             free(slnk_entry);
+ 	    if (G.outfile)
+-	        fclose(G.outfile);
+-            return;
++               errval = CloseError(G.outfile, G.filename);
++            return errval;
+         }
+ 
+ 	if (G.outfile)
+-            fclose(G.outfile);         /* close "link" file for good... */
++            errval = CloseError(G.outfile, G.filename); /* close "lnk" file for good*/
+         slnk_entry->target[ucsize] = '\0';
+         if (QCOND2)
+             Info(slide, 0, ((char *)slide, "-> %s ",
+@@ -1118,7 +1157,7 @@ void close_outfile(__G)    /* GRR: chang
+         else
+             G.slink_head = slnk_entry;
+         G.slink_last = slnk_entry;
+-        return;
++        return errval;
+     }
+ #endif /* SYMLINKS */
+ 
+@@ -1166,6 +1205,7 @@ void close_outfile(__G)    /* GRR: chang
+ #endif /* ?AOS_VS */
+     }
+ 
++    return errval;
+ } /* end function close_outfile() */
+ 
+ #endif /* !MTS */
+diff -up unzip-5.52/extract.c.err unzip-5.52/extract.c
+--- unzip-5.52/extract.c.err	2008-02-08 14:51:52.000000000 +0100
++++ unzip-5.52/extract.c	2008-02-08 14:51:52.000000000 +0100
+@@ -1676,24 +1676,21 @@ static int extract_or_test_member(__G)  
+ 
+ #ifdef VMS                  /* VMS:  required even for stdout! (final flush) */
+     if (!uO.tflag)           /* don't close NULL file */
+-        close_outfile(__G);
++        error = close_outfile(__G);
+ #else
+ #ifdef DLL
+     if (!uO.tflag && (!uO.cflag || G.redirect_data)) {
+         if (G.redirect_data)
+             FINISH_REDIRECT();
+         else
+-            close_outfile(__G);
++            error = close_outfile(__G);
+     }
+ #else
+     if (!uO.tflag && !uO.cflag)   /* don't close NULL file or stdout */
+-        close_outfile(__G);
++        error = close_outfile(__G);
+ #endif
+ #endif /* VMS */
+ 
+-            /* GRR: CONVERT close_outfile() TO NON-VOID:  CHECK FOR ERRORS! */
+-
+-
+     if (G.disk_full) {            /* set by flush() */
+         if (G.disk_full > 1) {
+ #if (defined(DELETE_IF_FULL) && defined(HAVE_UNLINK))
