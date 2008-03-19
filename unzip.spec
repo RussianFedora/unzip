@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -17,6 +17,7 @@ Patch11: unzip-5.52-open.patch
 Patch12: unzip-5.52-4GB3.patch
 Patch13: unzip-5.52-4GB_types.patch
 Patch14: unzip-5.52-249057.patch
+Patch15: unzip-5.52-cve-2008-0888.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -45,6 +46,7 @@ a zip archive.
 %patch12 -p1 -b .4GB3
 %patch13 -p1 -b .4BG4
 %patch14 -p1 -b .err
+%patch15 -p1 -b .cve-2008-0888
 ln -s unix/Makefile Makefile
 
 %build
@@ -65,6 +67,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Wed Mar 19 2008 Ivana Varekova <varekova@redhat.com> - 5.52-9
+- fix crash (double free) on malformed zip archive
+  CVE-2008-0888 (#431438)
+
 * Fri Feb  8 2008 Ivana Varekova <varekova@redhat.com> - 5.52-8
 - fix output when out of space error appears
 
