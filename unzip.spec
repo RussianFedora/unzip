@@ -1,25 +1,21 @@
 Summary: A utility for unpacking zip files
 Name: unzip
-Version: 5.52
-Release: 11%{?dist}
+Version: 6.0
+Release: 1%{?dist}
 License: BSD
 Group: Applications/Archiving
-Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
-Patch0: unzip542-rpmoptflags.patch
-Patch2: unzip-5.51-link-segv.patch
-Patch3: unzip-5.51-link-segv2.patch
-Patch6: unzip-5.52-toctou.patch
-Patch7: unzip-5.52-near-4GB.patch
-Patch8: unzip-5.52-near-4GB2.patch
-Patch9: unzip-5.52-long-filename.patch
-Patch10: unzip-5.52-makefile.patch
-Patch11: unzip-5.52-open.patch
-Patch12: unzip-5.52-4GB3.patch
-Patch13: unzip-5.52-4GB_types.patch
-Patch14: unzip-5.52-249057.patch
-Patch15: unzip-5.52-cve-2008-0888.patch
-URL: http://www.info-zip.org/pub/infozip/UnZip.html
+Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
+
+# Not sent to upstream.
+Patch1: unzip-6.0-bzip2-configure.patch
+# Upstream plans to do this in zip (hopefully also in unzip).
+Patch2: unzip-6.0-exec-shield.patch
+# Upstream plans to do similar thing.
+Patch3: unzip-6.0-close.patch
+
+URL: http://www.info-zip.org/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires:  bzip2-devel
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -33,29 +29,17 @@ Install the unzip package if you need to list, test or extract files from
 a zip archive.
 
 %prep
-%setup -q 
-%patch0 -p1 -b .rpmo
-%patch2 -p1 -b .link-segv
-%patch3 -p1 -b .morn
-%patch6 -p1 -b .toctou
-%patch7 -p1 -b .4GB
-%patch8 -p1 -b .4GB2
-%patch9 -p1 -b .lfn
-%patch10 -p1 -b .make
-%patch11 -p1 -b .open
-%patch12 -p1 -b .4GB3
-%patch13 -p1 -b .4BG4
-%patch14 -p1 -b .err
-%patch15 -p1 -b .cve-2008-0888
-ln -s unix/Makefile Makefile
+%setup -q -n unzip60
+%patch1 -p1 -b .bzip2-configure
+%patch2 -p1 -b .exec-shield
+%patch3 -p1 -b .close
 
 %build
-make CFLAGS="-D_LARGEFILE64_SOURCE" linux_noasm LF2="" %{?_smp_mflags}
+make -f unix/Makefile "CF_NOOPT=-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-
-make prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install LF2="" 
+make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install LF2="" 
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -67,6 +51,30 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Nov 16 2009 Karel Klic <kklic@redhat.com> - 6.0-1
+- New upstream version
+- Compiled using `make generic_gcc` (includes asm)
+- Removed unzip542-rpmoptflags.patch, because RPM_OPT_FLAGS 
+  are provided using command line
+- Removed unzip-5.51-link-segv.patch, because the link file 
+  is not reopened in the current version
+- Removed unzip-5.51-link-segv2.patch, the bug was already fixed 
+  in open_outfile in 5.52
+- Removed unzip-5.52-toctou.patch (CAN-2005-2475), the vulnerability 
+  is fixed in the current version
+- Removed unzip-5.52-near-4GB.patch, unzip-5.52-near-4GB2.patch, 
+  unzip-5.52-4GB3.patch, and unzip-5.52-4GB_types.patch, because 
+  the current version supports large files
+- Removed unzip-5.52-long-filename.patch, the current version
+  fixes the vulnerability by checking the length of command line 
+  arguments in unzip.c
+- Removed unzip-5.52-makefile.patch, because we no longer create
+  the link manually
+- Removed unzip-5.52-open.patch, the current version uses umask.
+- Removed unzip-5.52-cve-2008-0888.patch, the current version
+  fixes this vulnerability
+- Ported unzip-5.52-249057.patch to current version (unzip-6.0-close)
+
 * Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.52-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
