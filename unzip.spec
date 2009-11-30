@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 5.52
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: ftp://ftp.info-zip.org/pub/infozip/src/unzip552.tar.gz
@@ -18,6 +18,9 @@ Patch12: unzip-5.52-4GB3.patch
 Patch13: unzip-5.52-4GB_types.patch
 Patch14: unzip-5.52-249057.patch
 Patch15: unzip-5.52-cve-2008-0888.patch
+# Details in rhbz#532380.
+# Reported to upstream: http://www.info-zip.org/board/board.pl?m-1259575993/
+Patch16: unzip-5.52-attribs-overflow.patch
 URL: http://www.info-zip.org/pub/infozip/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -47,6 +50,7 @@ a zip archive.
 %patch13 -p1 -b .4BG4
 %patch14 -p1 -b .err
 %patch15 -p1 -b .cve-2008-0888
+%patch16 -p1 -b .attribs-overflow
 ln -s unix/Makefile Makefile
 
 %build
@@ -67,6 +71,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Nov 30 2009 Karel Klic <kklic@redhat.com> - 5.52-12
+- fixed a buffer overflow (rhbz#532380)
+
 * Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.52-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
