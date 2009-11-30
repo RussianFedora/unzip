@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -12,6 +12,12 @@ Patch1: unzip-6.0-bzip2-configure.patch
 Patch2: unzip-6.0-exec-shield.patch
 # Upstream plans to do similar thing.
 Patch3: unzip-6.0-close.patch
+# Details in rhbz#532380.
+# Reported to upstream: http://www.info-zip.org/board/board.pl?m-1259575993/
+Patch4: unzip-6.0-attribs-overflow.patch
+# Not sent to upstream, as it's Fedora/RHEL specific.
+# Modify the configure script not to request the strip of binaries.
+Patch5: unzip-6.0-nostrip.patch
 
 URL: http://www.info-zip.org/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -33,13 +39,15 @@ a zip archive.
 %patch1 -p1 -b .bzip2-configure
 %patch2 -p1 -b .exec-shield
 %patch3 -p1 -b .close
+%patch4 -p1 -b .attribs-overflow
+%patch5 -p1 -b .nostrip
 
 %build
-make -f unix/Makefile "CF_NOOPT=-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
+make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install LF2="" 
+make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,6 +59,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Mon Nov 30 2009 Karel Klic <kklic@redhat.com> - 6.0-2
+- Fixed a buffer overflow (rhbz#532380, unzip-6.0-attribs-overflow.patch)
+- Generate debuginfos (rhbz#540220, unzip-6.0-nostrip.patch)
+
 * Mon Nov 16 2009 Karel Klic <kklic@redhat.com> - 6.0-1
 - New upstream version
 - Compiled using `make generic_gcc` (includes asm)
