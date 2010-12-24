@@ -1,10 +1,13 @@
-Summary: A utility for unpacking zip files
-Name: unzip
-Version: 6.0
-Release: 2%{?dist}
-License: BSD
-Group: Applications/Archiving
-Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
+Summary:        A utility for unpacking zip files
+Summary(ru):    Инструмент для распаковки zip-файлов
+Name:           unzip
+Version:        6.0
+Release:        2%{?dist}.1
+Epoch:          1
+License:        BSD
+Group:          Applications/Archiving
+Source:         http://downloads.sourceforge.net/infozip/unzip60.tar.gz
+Packager:       Ivan Romanov <drizt@land.ru>
 
 # Not sent to upstream.
 Patch1: unzip-6.0-bzip2-configure.patch
@@ -18,10 +21,12 @@ Patch4: unzip-6.0-attribs-overflow.patch
 # Not sent to upstream, as it's Fedora/RHEL specific.
 # Modify the configure script not to request the strip of binaries.
 Patch5: unzip-6.0-nostrip.patch
+# Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly  
+Patch6: unzip-6.0-non-ascii-filenames.patch
 
 URL: http://www.info-zip.org/UnZip.html
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:  bzip2-devel
+BuildRequires:  bzip2-devel libnatspec-devel
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -41,9 +46,10 @@ a zip archive.
 %patch3 -p1 -b .close
 %patch4 -p1 -b .attribs-overflow
 %patch5 -p1 -b .nostrip
+%patch6 -p1 -b .non-ascii-filenames
 
 %build
-make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
+make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -59,6 +65,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Thu Jun 24 2010 Romanov Ivan <drizt@land.ru> - 6.0-2.1
+- Fixed bug rhbz#225576 unzip-6.0-non-ascii-filenames.patch
+- Add to requires libnatspec
+
 * Mon Nov 30 2009 Karel Klic <kklic@redhat.com> - 6.0-2
 - Fixed a buffer overflow (rhbz#532380, unzip-6.0-attribs-overflow.patch)
 - Generate debuginfos (rhbz#540220, unzip-6.0-nostrip.patch)
