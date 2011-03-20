@@ -2,12 +2,11 @@ Summary:        A utility for unpacking zip files
 Summary(ru):    Инструмент для распаковки zip-файлов
 Name:           unzip
 Version:        6.0
-Release:        3%{?dist}.1
+Release:        4%{?dist}.1
 Epoch:          1
 License:        BSD
 Group:          Applications/Archiving
 Source:         http://downloads.sourceforge.net/infozip/unzip60.tar.gz
-Packager:       Ivan Romanov <drizt@land.ru>
 
 # Not sent to upstream.
 Patch1: unzip-6.0-bzip2-configure.patch
@@ -65,6 +64,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/*/*
 
 %changelog
+* Sun Mar 20 2011 Arkady L. Shane <ashejn@russianfedora.ru> - 6.0-4.1
+- rebuilt fot Fedora 15
+
 * Thu Aug 12 2010 Arkady L. Shane <ashejn@russianfedora.ru> - 6.0-3.1
 - rebuilt for Fedora 14
 
