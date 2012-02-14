@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 3%{?dist}
+Release: 4%{?dist}.1.R
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -17,6 +17,9 @@ Patch4: unzip-6.0-attribs-overflow.patch
 # Not sent to upstream, as it's Fedora/RHEL specific.
 # Modify the configure script not to request the strip of binaries.
 Patch5: unzip-6.0-nostrip.patch
+# Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
+Patch6: unzip-6.0-non-ascii-filenames.patch
+
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
 
@@ -38,6 +41,7 @@ a zip archive.
 %patch3 -p1 -b .close
 %patch4 -p1 -b .attribs-overflow
 %patch5 -p1 -b .nostrip
+%patch6 -p1 -b .non-ascii-filenames
 
 %build
 make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
@@ -53,6 +57,9 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
+* Tue Feb 14 2012 Ivan Romanov <drizt@land.ru> - 6.0-4.1.R
+- added unzip-6.0-non-ascii-filenames patch
+
 * Mon May 24 2010 Karel Klic <kklic@redhat.com> - 6.0-3
 - Removed BuildRoot tag
 - Removed %%clean section

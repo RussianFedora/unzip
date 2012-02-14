@@ -1,0 +1,356 @@
+diff -urN unzip60.orig/unix/configure unzip60/unix/configure
+--- unzip60.orig/unix/configure	2009-01-19 03:41:18.000000000 +0500
++++ unzip60/unix/configure	2010-06-24 13:48:39.000000000 +0600
+@@ -16,8 +16,8 @@
+ CFLAGSR=${CFLAGS}
+ IZ_BZIP2=${3}
+ CFLAGS="${CFLAGS} -I. -DUNIX"
+-LFLAGS1=""
+-LFLAGS2=""
++LFLAGS1="-lnatspec"
++LFLAGS2="-lnatspec"
+ LN="ln -s"
+ 
+ CFLAGS_OPT=''
+diff -urN unzip60.orig/unix/Makefile unzip60/unix/Makefile
+--- unzip60.orig/unix/Makefile	2009-01-19 03:41:18.000000000 +0500
++++ unzip60/unix/Makefile	2010-06-24 13:48:39.000000000 +0600
+@@ -52,7 +52,7 @@
+ CF = $(CFLAGS) $(CF_NOOPT)
+ LFLAGS1 =
+ LF = -o unzip$E $(LFLAGS1)
+-LF2 = -s
++LF2 = -l natspec
+ 
+ # UnZipSFX flags
+ SL = -o unzipsfx$E $(LFLAGS1)
+@@ -775,7 +775,7 @@
+ # with "echo" instead).
+ #
+ gcc:		unix_make
+-	$(MAKE) unzips CC=gcc LD=gcc CFLAGS="-O3" LF2=""
++	$(MAKE) unzips CC=gcc LD=gcc CFLAGS="-O3" LF2="$(LF2)"
+ 	$(STRIP) $(UNZIPS)
+ 
+ # Heurikon HK68 (68010), UniPlus+ System V 5.0, Green Hills C-68000
+diff -urN unzip60.orig/unix/unix.c unzip60/unix/unix.c
+--- unzip60.orig/unix/unix.c	2010-06-24 13:45:19.000000000 +0600
++++ unzip60/unix/unix.c	2010-06-24 14:00:00.000000000 +0600
+@@ -30,6 +30,9 @@
+ #define UNZIP_INTERNAL
+ #include "unzip.h"
+ 
++#include <iconv.h>
++#include <natspec.h>
++
+ #ifdef SCO_XENIX
+ #  define SYSNDIR
+ #else  /* SCO Unix, AIX, DNIX, TI SysV, Coherent 4.x, ... */
+@@ -1907,3 +1910,44 @@
+     }
+ }
+ #endif /* QLZIP */
++
++
++char OEM_CP[MAX_CP_NAME] = "CP866";
++char ISO_CP[MAX_CP_NAME] = "";
++
++/* Getr the default value of OEM_CP based on the current locale.
++ * ISO_CP is left alone for now. */
++void init_conversion_charsets()
++{
++    /* Make a guess only if OEM_CP not already set. */ 
++    if(*OEM_CP == '\0') {
++        const char * archive_charset = natspec_get_charset_by_locale(NATSPEC_DOSCS, "");
++        strncpy(OEM_CP, archive_charset, sizeof(OEM_CP));
++    }
++
++    if(*ISO_CP == '\0') {
++        const char * archive_charset = natspec_get_charset_by_locale(NATSPEC_WINCS, "");
++        strncpy(ISO_CP, archive_charset, sizeof(ISO_CP));
++    }
++
++}
++
++/* Convert a string from OEM_CP to the current locale charset. */
++inline void oem_intern(char *string)
++{
++    char *buf = natspec_convert(string, 0, OEM_CP, 0);
++	/* Since Ext_ASCII_TO_Native used only for G.filename[FILNAMESIZE],
++	   use FILNAMSIZ as string size */
++    strncpy(string, buf, FILNAMSIZ);
++	free (buf);
++}
++
++/* Convert a string from ISO_CP to the current locale charset. */
++inline void iso_intern(char *string)
++{
++    char *buf = natspec_convert(string, 0, ISO_CP, 0);
++	/* Since Ext_ASCII_TO_Native used only for G.filename[FILNAMESIZE],
++	   use FILNAMSIZ as string size */
++    strncpy(string, buf, FILNAMSIZ);
++	free (buf);
++}
+diff -urN unzip60.orig/unix/unxcfg.h unzip60/unix/unxcfg.h
+--- unzip60.orig/unix/unxcfg.h	2009-04-17 00:36:12.000000000 +0600
++++ unzip60/unix/unxcfg.h	2010-06-24 13:48:39.000000000 +0600
+@@ -227,4 +227,30 @@
+ /* wild_dir, dirname, wildname, matchname[], dirnamelen, have_dirname, */
+ /*    and notfirstcall are used by do_wild().                          */
+ 
++
++#define MAX_CP_NAME 25 
++   
++#ifdef SETLOCALE
++#  undef SETLOCALE
++#endif
++#define SETLOCALE(category, locale) setlocale(category, locale)
++#include <locale.h>
++   
++#ifdef _ISO_INTERN
++#  undef _ISO_INTERN
++#endif
++#define _ISO_INTERN(str1) iso_intern(str1)
++
++#ifdef _OEM_INTERN
++#  undef _OEM_INTERN
++#endif
++#ifndef IZ_OEM2ISO_ARRAY
++#  define IZ_OEM2ISO_ARRAY
++#endif
++#define _OEM_INTERN(str1) oem_intern(str1)
++
++void iso_intern(char *);
++void oem_intern(char *);
++void init_conversion_charsets(void);
++   
+ #endif /* !__unxcfg_h */
+diff -urN unzip60.orig/unzip.c unzip60/unzip.c
+--- unzip60.orig/unzip.c	2009-04-17 00:26:52.000000000 +0600
++++ unzip60/unzip.c	2010-06-24 14:03:18.000000000 +0600
+@@ -331,7 +331,9 @@
+   -h  print header line       -t  print totals for listed files or for all\n\
+   -z  print zipfile comment   -T  print file times in sortable decimal format\
+ \n  -C  be case-insensitive   %s\
+-  -x  exclude filenames that follow from listing\n";
++  -x  exclude filenames that follow from listing\n\
++  -O CHARSET  specify a character encoding for DOS, Windows and OS/2 archives\n\
++  -I CHARSET  specify a character encoding for UNIX and other archives\n";
+ #ifdef MORE
+    static ZCONST char Far ZipInfoUsageLine4[] =
+      "  -M  page output through built-in \"more\"\n";
+@@ -673,7 +675,9 @@
+   -j  junk paths (do not make directories)   -aa treat ALL files as text\n\
+   -U  use escapes for all non-ASCII Unicode  -UU ignore any Unicode fields\n\
+   -C  match filenames case-insensitively     -L  make (some) names \
+-lowercase\n %-42s  -V  retain VMS version numbers\n%s";
++lowercase\n %-42s  -V  retain VMS version numbers\n%s\
++  -O CHARSET  specify a character encoding for DOS, Windows and OS/2 archives\n\
++  -I CHARSET  specify a character encoding for UNIX and other archives\n";
+ #endif /* ?VMS */
+ #else /* !UNICODE_SUPPORT */
+ #ifdef VMS
+@@ -692,7 +696,9 @@
+   -o  overwrite files WITHOUT prompting      -a  auto-convert any text files\n\
+   -j  junk paths (do not make directories)   -aa treat ALL files as text\n\
+   -C  match filenames case-insensitively     -L  make (some) names \
+-lowercase\n %-42s  -V  retain VMS version numbers\n%s";
++lowercase\n %-42s  -V  retain VMS version numbers\n%s\
++  -O CHARSET  specify a character encoding for DOS, Windows and OS/2 archives\n\
++  -I CHARSET  specify a character encoding for UNIX and other archives\n";
+ #endif /* ?VMS */
+ #endif /* ?UNICODE_SUPPORT */
+ 
+@@ -803,6 +809,10 @@
+ #endif /* UNICODE_SUPPORT */
+ 
+ 
++#ifdef UNIX
++    init_conversion_charsets();
++#endif
++
+ #if (defined(__IBMC__) && defined(__DEBUG_ALLOC__))
+     extern void DebugMalloc(void);
+ 
+@@ -1336,6 +1346,11 @@
+     argc = *pargc;
+     argv = *pargv;
+ 
++#ifdef UNIX
++    extern char OEM_CP[MAX_CP_NAME];
++    extern char ISO_CP[MAX_CP_NAME];
++#endif
++    
+     while (++argv, (--argc > 0 && *argv != NULL && **argv == '-')) {
+         s = *argv + 1;
+         while ((c = *s++) != 0) {    /* "!= 0":  prevent Turbo C warning */
+@@ -1517,6 +1532,35 @@
+                     }
+                     break;
+ #endif  /* MACOS */
++#ifdef UNIX
++    			case ('I'):
++                    if (negative) {
++                        Info(slide, 0x401, ((char *)slide,
++                          "error:  encodings can't be negated"));
++                        return(PK_PARAM);
++    				} else {
++    					if(*s) { /* Handle the -Icharset case */
++    						/* Assume that charsets can't start with a dash to spot arguments misuse */
++    						if(*s == '-') { 
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						strncpy(ISO_CP, s, sizeof(ISO_CP));
++    					} else { /* -I charset */
++    						++argv;
++    						if(!(--argc > 0 && *argv != NULL && **argv != '-')) {
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						s = *argv;
++    						strncpy(ISO_CP, s, sizeof(ISO_CP));
++    					}
++    					while(*(++s)); /* No params straight after charset name */
++    				}
++    				break;
++#endif /* ?UNIX */
+                 case ('j'):    /* junk pathnames/directory structure */
+                     if (negative)
+                         uO.jflag = FALSE, negative = 0;
+@@ -1592,6 +1636,35 @@
+                     } else
+                         ++uO.overwrite_all;
+                     break;
++#ifdef UNIX
++    			case ('O'):
++                    if (negative) {
++                        Info(slide, 0x401, ((char *)slide,
++                          "error:  encodings can't be negated"));
++                        return(PK_PARAM);
++    				} else {
++    					if(*s) { /* Handle the -Ocharset case */
++    						/* Assume that charsets can't start with a dash to spot arguments misuse */
++    						if(*s == '-') { 
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						strncpy(OEM_CP, s, sizeof(OEM_CP));
++    					} else { /* -O charset */
++    						++argv;
++    						if(!(--argc > 0 && *argv != NULL && **argv != '-')) {
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -O argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						s = *argv;
++    						strncpy(OEM_CP, s, sizeof(OEM_CP));
++    					}
++    					while(*(++s)); /* No params straight after charset name */
++    				}
++    				break;
++#endif /* ?UNIX */
+                 case ('p'):    /* pipes:  extract to stdout, no messages */
+                     if (negative) {
+                         uO.cflag = FALSE;
+diff -urN unzip60.orig/zipinfo.c unzip60/zipinfo.c
+--- unzip60.orig/zipinfo.c	2010-06-24 13:45:19.000000000 +0600
++++ unzip60/zipinfo.c	2010-06-24 14:06:18.000000000 +0600
+@@ -457,6 +457,10 @@
+     int    tflag_slm=TRUE, tflag_2v=FALSE;
+     int    explicit_h=FALSE, explicit_t=FALSE;
+ 
++#ifdef UNIX
++    extern char OEM_CP[MAX_CP_NAME];
++    extern char ISO_CP[MAX_CP_NAME];
++#endif
+ 
+ #ifdef MACOS
+     uO.lflag = LFLAG;         /* reset default on each call */
+@@ -501,6 +505,35 @@
+                             uO.lflag = 0;
+                     }
+                     break;
++#ifdef UNIX
++    			case ('I'):
++                    if (negative) {
++                        Info(slide, 0x401, ((char *)slide,
++                          "error:  encodings can't be negated"));
++                        return(PK_PARAM);
++    				} else {
++    					if(*s) { /* Handle the -Icharset case */
++    						/* Assume that charsets can't start with a dash to spot arguments misuse */
++    						if(*s == '-') { 
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						strncpy(ISO_CP, s, sizeof(ISO_CP));
++    					} else { /* -I charset */
++    						++argv;
++    						if(!(--argc > 0 && *argv != NULL && **argv != '-')) {
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						s = *argv;
++    						strncpy(ISO_CP, s, sizeof(ISO_CP));
++    					}
++    					while(*(++s)); /* No params straight after charset name */
++    				}
++    				break;
++#endif /* ?UNIX */
+                 case 'l':      /* longer form of "ls -l" type listing */
+                     if (negative)
+                         uO.lflag = -2, negative = 0;
+@@ -521,6 +554,35 @@
+                         G.M_flag = TRUE;
+                     break;
+ #endif
++#ifdef UNIX
++    			case ('O'):
++                    if (negative) {
++                        Info(slide, 0x401, ((char *)slide,
++                          "error:  encodings can't be negated"));
++                        return(PK_PARAM);
++    				} else {
++    					if(*s) { /* Handle the -Ocharset case */
++    						/* Assume that charsets can't start with a dash to spot arguments misuse */
++    						if(*s == '-') { 
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -I argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						strncpy(OEM_CP, s, sizeof(OEM_CP));
++    					} else { /* -O charset */
++    						++argv;
++    						if(!(--argc > 0 && *argv != NULL && **argv != '-')) {
++    	                        Info(slide, 0x401, ((char *)slide,
++        		                  "error:  a valid character encoding should follow the -O argument"));
++    	                        return(PK_PARAM); 
++    						}
++    						s = *argv;
++    						strncpy(OEM_CP, s, sizeof(OEM_CP));
++    					}
++    					while(*(++s)); /* No params straight after charset name */
++    				}
++    				break;
++#endif /* ?UNIX */
+                 case 's':      /* default:  shorter "ls -l" type listing */
+                     if (negative)
+                         uO.lflag = -2, negative = 0;
+
+--- unzip60.orig/extract.c	2009-04-17 00:26:52.000000000 +0600
++++ unzip60/extract.c	2010-06-24 14:03:18.000000000 +0600
+@@ -2593,7 +2593,7 @@
+      */
+ #   define UZ_FNFILTER_REPLACECHAR      '?'
+ # endif
+-        if (!isprint(*r)) {
++        if ((!isprint(*r)) && (*r < 128)) {
+             if (*r < 32) {
+                 /* ASCII control codes are escaped as "^{letter}". */
+                 if (se != NULL && (s > (space + (size-4)))) {
