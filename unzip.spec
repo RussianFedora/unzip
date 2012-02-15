@@ -22,6 +22,7 @@ Patch6: unzip-6.0-non-ascii-filenames.patch
 
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
+BuildRequires:  libnatspec-devel
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -57,8 +58,9 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Tue Feb 14 2012 Ivan Romanov <drizt@land.ru> - 6.0-4.1.R
+* Wed Feb 15 2012 Ivan Romanov <drizt@land.ru> - 6.0-4.1.R
 - added unzip-6.0-non-ascii-filenames patch
+- libnatspec-devel in BR
 
 * Mon May 24 2010 Karel Klic <kklic@redhat.com> - 6.0-3
 - Removed BuildRoot tag
