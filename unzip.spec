@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 5%{?dist}.R
+Release: 7%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -48,16 +48,19 @@ a zip archive.
 make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
-rm -rf $RPM_BUILD_ROOT
 make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install
 
 %files
-%defattr(-,root,root)
 %doc README BUGS LICENSE
 %{_bindir}/*
 %{_mandir}/*/*
 
 %changelog
+* Mon Dec 24 2012 Ivan Romanov <drizt@land.ru> - 6.0-7.R
+- bump version
+- Resolves: #884679 - zip files with bzip2 compression 
+- cleaned spec
+
 * Thu Feb 16 2012 Arkady L. Shane <ashejn@russianfedora.ru> - 6.0-5.R
 - bump release for f17 and rawhide
 
