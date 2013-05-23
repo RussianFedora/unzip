@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -17,9 +17,9 @@ Patch4: unzip-6.0-attribs-overflow.patch
 # Not sent to upstream, as it's Fedora/RHEL specific.
 # Modify the configure script not to request the strip of binaries.
 Patch5: unzip-6.0-nostrip.patch
+Patch6: unzip-6.0-manpage-fix.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
-Patch6: unzip-6.0-non-ascii-filenames.patch
-
+Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
 BuildRequires:  libnatspec-devel
@@ -42,31 +42,44 @@ a zip archive.
 %patch3 -p1 -b .close
 %patch4 -p1 -b .attribs-overflow
 %patch5 -p1 -b .nostrip
-%patch6 -p1 -b .non-ascii-filenames
+%patch6 -p1 -b .manpage-fix
+%patch50 -p1 -b .non-ascii-filenames
 
 %build
 make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
+rm -rf $RPM_BUILD_ROOT
 make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{_mandir}/man1 INSTALL="cp -p" install
 
 %files
+%defattr(-,root,root)
 %doc README BUGS LICENSE
 %{_bindir}/*
 %{_mandir}/*/*
 
 %changelog
-* Mon Dec 24 2012 Ivan Romanov <drizt@land.ru> - 6.0-7.R
-- bump version
-- Resolves: #884679 - zip files with bzip2 compression 
-- cleaned spec
-
-* Thu Feb 16 2012 Arkady L. Shane <ashejn@russianfedora.ru> - 6.0-5.R
-- bump release for f17 and rawhide
-
-* Wed Feb 15 2012 Ivan Romanov <drizt@land.ru> - 6.0-4.1.R
+* Thu May 23 2013 Ivan Romanov <drizt@land.ru> - 6.0-8.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-8
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
+* Mon Dec 10 2012 Michal Luscon <mluscon@redhat.com> 6.0-7
+- Resolves: #884679 - zip files with bzip2 compression 
+
+* Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org>
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+- Fix minor manpage spelling mistake
+  Resolves: #675454
+
+* Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
 * Mon May 24 2010 Karel Klic <kklic@redhat.com> - 6.0-3
 - Removed BuildRoot tag
