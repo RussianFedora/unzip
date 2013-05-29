@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -18,6 +18,10 @@ Patch4: unzip-6.0-attribs-overflow.patch
 # Modify the configure script not to request the strip of binaries.
 Patch5: unzip-6.0-nostrip.patch
 Patch6: unzip-6.0-manpage-fix.patch
+# Update match.c with recmatch() from zip 3.0's util.c
+# This also resolves the license issue in that old function.
+# Original came from here: https://projects.parabolagnulinux.org/abslibre.git/plain/libre/unzip-libre/match.patch
+Patch7: unzip-6.0-fix-recmatch.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
 Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
@@ -43,10 +47,11 @@ a zip archive.
 %patch4 -p1 -b .attribs-overflow
 %patch5 -p1 -b .nostrip
 %patch6 -p1 -b .manpage-fix
+%patch7 -p1 -b .recmatch
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
-make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
+make -f unix/Makefile CF_NOOPT="-I. -DUNIX -DWILD_STOP_AT_DIR $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -59,9 +64,13 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Thu May 23 2013 Ivan Romanov <drizt@land.ru> - 6.0-8.R
+* Wed May 29 2013 Ivan Romanov <drizt@land.ru> - 6.0-9.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Tue May 28 2013 Tom Callaway <spot@fedoraproject.org> - 6.0-9
+- Apply changes to match.c to sync with recmatch from util.c (from zip 3.0)
+  This also resolves the license issue in that file.
 
 * Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-8
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
