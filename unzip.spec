@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -51,7 +51,7 @@ a zip archive.
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
-make -f unix/Makefile CF_NOOPT="-I. -DUNIX -DWILD_STOP_AT_DIR $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
+make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -64,9 +64,12 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Wed May 29 2013 Ivan Romanov <drizt@land.ru> - 6.0-9.R
+* Fri Jul  5 2013 Ivan Romanov <drizt@land.ru> - 6.0-10.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Mon Jun 24 2013 Tom Callaway <spot@fedoraproject.org> - 6.0-10
+- unset WILD_STOP_AT_DIR
 
 * Tue May 28 2013 Tom Callaway <spot@fedoraproject.org> - 6.0-9
 - Apply changes to match.c to sync with recmatch from util.c (from zip 3.0)
