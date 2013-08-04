@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -64,9 +64,12 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Fri Jul  5 2013 Ivan Romanov <drizt@land.ru> - 6.0-10.R
+* Sun Aug 04 2013 Ivan Romanov <drizt@land.ru> - 6.0-11.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-11
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
 * Mon Jun 24 2013 Tom Callaway <spot@fedoraproject.org> - 6.0-10
 - unset WILD_STOP_AT_DIR
