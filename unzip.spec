@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -22,6 +22,8 @@ Patch6: unzip-6.0-manpage-fix.patch
 # This also resolves the license issue in that old function.
 # Original came from here: https://projects.parabolagnulinux.org/abslibre.git/plain/libre/unzip-libre/match.patch
 Patch7: unzip-6.0-fix-recmatch.patch
+# Update process.c
+Patch8: unzip-6.0-symlink.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
 Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
@@ -48,6 +50,7 @@ a zip archive.
 %patch5 -p1 -b .nostrip
 %patch6 -p1 -b .manpage-fix
 %patch7 -p1 -b .recmatch
+%patch8 -p1 -b .symlink
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
@@ -64,9 +67,13 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Sun Aug 04 2013 Ivan Romanov <drizt@land.ru> - 6.0-11.R
+* Fri Nov 22 2013 Ivan Romanov <drizt@land.ru> - 6.0-12.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Mon Oct 21 2013 Petr Stodulka <pstodulk@redhat.com> - 6.0.-12
+- Solve problem with symlink errors in archive with many files
+  (#740012,#972427)
 
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-11
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
