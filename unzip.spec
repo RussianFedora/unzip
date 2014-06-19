@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 12%{?dist}
+Release: 14%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -24,6 +24,11 @@ Patch6: unzip-6.0-manpage-fix.patch
 Patch7: unzip-6.0-fix-recmatch.patch
 # Update process.c
 Patch8: unzip-6.0-symlink.patch
+# change using of macro "case_map" by "to_up"
+Patch9: unzip-6.0-caseinsensitive.patch
+# downstream fix for "-Werror=format-security"
+# upstream doesn't want hear about this option again
+Patch10: unzip-6.0-format-secure.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
 Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
@@ -51,6 +56,8 @@ a zip archive.
 %patch6 -p1 -b .manpage-fix
 %patch7 -p1 -b .recmatch
 %patch8 -p1 -b .symlink
+%patch9 -p1 -b .caseinsensitive
+%patch10 -p1 -b .format-secure
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
@@ -67,9 +74,20 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Fri Nov 22 2013 Ivan Romanov <drizt@land.ru> - 6.0-12.R
+* Thu Jun 19 2014 Ivan Romanov <drizt@land.ru> - 6.0-14.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Fri Jun 06 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-14
+- Fix previous patch (#1104018) - case-insensitive matching
+  was reversed in function recmatch
+
+* Wed Jun 04 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-13
+- Solve problem with non-functional case-insensitive matching
+  (#1104018)
+- Added patch for build option "-Werror=format-security"
+  However solve only false positives - here is not really
+  vulnerable print.
 
 * Mon Oct 21 2013 Petr Stodulka <pstodulk@redhat.com> - 6.0.-12
 - Solve problem with symlink errors in archive with many files
