@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 15%{?dist}
+Release: 17%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -29,6 +29,8 @@ Patch9: unzip-6.0-caseinsensitive.patch
 # downstream fix for "-Werror=format-security"
 # upstream doesn't want hear about this option again
 Patch10: unzip-6.0-format-secure.patch
+Patch11: unzip-6.0-valgrind.patch
+Patch12: unzip-6.0-x-option.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
 Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
@@ -58,10 +60,15 @@ a zip archive.
 %patch8 -p1 -b .symlink
 %patch9 -p1 -b .caseinsensitive
 %patch10 -p1 -b .format-secure
+%patch11 -p1 -b .valgrind
+%patch12 -p1 -b .x-option
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
-make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS" generic_gcc %{?_smp_mflags}
+# IZ_HAVE_UXUIDGID is needed for right functionality of unzip -X
+# NOMEMCPY solve problem with memory overlapping - decomression is slowly,
+# but successfull.
+make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS -DNOMEMCPY -DIZ_HAVE_UXUIDGID" generic_gcc %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -74,9 +81,20 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Wed Aug 20 2014 Ivan Romanov <drizt@land.ru> - 6.0-15.R
+* Sat Dec  6 2014 Ivan Romanov <drizt@land.ru> - 6.0-17.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
+
+* Thu Nov 21 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-17
+- Fix unitialized reads (#558738)
+- Fix fix broken -X option - never worked before. Added -DIZ_HAVE_UXUIDGID
+  option for compilation.
+  (#935202)
+
+* Thu Nov 06 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-16
+- Fix producing of incorrect output due to memcpy overlapping
+  by added option -D NOMEMCPY to compile section.
+  (#1153388)
 
 * Mon Aug 18 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 6.0-15
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
