@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 17%{?dist}
+Release: 21%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -31,6 +31,11 @@ Patch9: unzip-6.0-caseinsensitive.patch
 Patch10: unzip-6.0-format-secure.patch
 Patch11: unzip-6.0-valgrind.patch
 Patch12: unzip-6.0-x-option.patch
+Patch13: unzip-6.0-overflow.patch
+Patch14: unzip-6.0-cve-2014-8139.patch
+Patch15: unzip-6.0-cve-2014-8140.patch
+Patch16: unzip-6.0-cve-2014-8141.patch
+Patch17: unzip-6.0-overflow-long-fsize.patch
 # Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
 Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
@@ -62,6 +67,11 @@ a zip archive.
 %patch10 -p1 -b .format-secure
 %patch11 -p1 -b .valgrind
 %patch12 -p1 -b .x-option
+%patch13 -p1 -b .overflow
+%patch14 -p1 -b .cve-2014-8139
+%patch15 -p1 -b .cve-2014-8140
+%patch16 -p1 -b .cve-2014-8141
+%patch17 -p1 -b .overflow-long-fsize
 %patch50 -p1 -b .non-ascii-filenames
 
 %build
@@ -81,11 +91,31 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Sat Dec  6 2014 Ivan Romanov <drizt@land.ru> - 6.0-17.R
+* Thu Jun  4 2015 Ivan Romanov <drizt@land.ru> - 6.0-21.R
 - added unzip-6.0-non-ascii-filenames patch
 - libnatspec-devel in BR
 
-* Thu Nov 21 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-17
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 6.0-21
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
+* Wed Feb 11 2015 Petr Stodulka <pstodulk@redhat.com> - 6.0-20
+- re-patch CVE-2014-9636 - original patch was incorrect (#1184986)
+
+* Tue Feb 10 2015 Petr Stodulka <pstodulk@redhat.com> - 6.0-19
+- Fix CVE-2014-8139 - CRC32 verification heap-based buffer overread 
+  (#1174844)
+- Fix CVE-2014-8140 - out-of-bounds write issue in test_compr_eb()
+  (#1174851)
+- Fix CVE-2014-8141 - getZip64Data() out-of-bounds read issues
+  (#1174856)
+- Fix buffer overflow on long file sizes
+  (#1191136)
+
+* Mon Jan 26 2015 Petr Stodulka <pstodulk@redhat.com> - 6.0-18
+- Fix security bug - CVE-2014-9636
+
+* Fri Nov 21 2014 Petr Stodulka <pstodulk@redhat.com> - 6.0-17
 - Fix unitialized reads (#558738)
 - Fix fix broken -X option - never worked before. Added -DIZ_HAVE_UXUIDGID
   option for compilation.
