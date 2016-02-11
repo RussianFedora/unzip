@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 23%{?dist}
+Release: 24%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -94,7 +94,7 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Thu Feb 11 2016 Arkady L. Shane <ashejn@russianfedora.pro> - 6.0-23.R
+* Thu Feb 11 2016 Arkady L. Shane <ashejn@russianfedora.pro> - 6.0-24.R
 - rebuilt with libnatspec support
 
 * Mon Nov 23 2015 Petr Stodulka <pstodulk@redhat.com> - 6.0-23
