@@ -1,41 +1,18 @@
-diff -urN unzip60.orig/unix/configure unzip60/unix/configure
---- unzip60.orig/unix/configure	2009-01-19 03:41:18.000000000 +0500
-+++ unzip60/unix/configure	2010-06-24 13:48:39.000000000 +0600
-@@ -16,8 +16,8 @@
- CFLAGSR=${CFLAGS}
- IZ_BZIP2=${3}
- CFLAGS="${CFLAGS} -I. -DUNIX"
--LFLAGS1=""
--LFLAGS2=""
-+LFLAGS1="-lnatspec"
-+LFLAGS2="-lnatspec"
- LN="ln -s"
- 
- CFLAGS_OPT=''
-diff -urN unzip60.orig/unix/Makefile unzip60/unix/Makefile
---- unzip60.orig/unix/Makefile	2009-01-19 03:41:18.000000000 +0500
-+++ unzip60/unix/Makefile	2010-06-24 13:48:39.000000000 +0600
+diff -pur unzip-5.52-orig/unix/Makefile unzip-5.52/unix/Makefile
+--- unzip-5.52-orig/unix/Makefile	2007-07-30 11:40:15 +0400
++++ unzip-5.52/unix/Makefile	2007-07-30 12:03:54 +0400
 @@ -52,7 +52,7 @@
  CF = $(CFLAGS) $(CF_NOOPT)
  LFLAGS1 =
  LF = -o unzip$E $(LFLAGS1)
 -LF2 = -s
 +LF2 = -l natspec
- 
+
  # UnZipSFX flags
  SL = -o unzipsfx$E $(LFLAGS1)
-@@ -775,7 +775,7 @@
- # with "echo" instead).
- #
- gcc:		unix_make
--	$(MAKE) unzips CC=gcc LD=gcc CFLAGS="-O3" LF2=""
-+	$(MAKE) unzips CC=gcc LD=gcc CFLAGS="-O3" LF2="$(LF2)"
- 	$(STRIP) $(UNZIPS)
- 
- # Heurikon HK68 (68010), UniPlus+ System V 5.0, Green Hills C-68000
-diff -urN unzip60.orig/unix/unix.c unzip60/unix/unix.c
---- unzip60.orig/unix/unix.c	2010-06-24 13:45:19.000000000 +0600
-+++ unzip60/unix/unix.c	2010-06-24 14:00:00.000000000 +0600
+diff -pur unzip-5.52-orig/unix/unix.c unzip-5.52/unix/unix.c
+--- unzip-5.52-orig/unix/unix.c	2007-07-30 11:40:15 +0400
++++ unzip-5.52/unix/unix.c	2007-07-30 12:23:42 +0400
 @@ -30,6 +30,9 @@
  #define UNZIP_INTERNAL
  #include "unzip.h"
@@ -46,13 +23,13 @@ diff -urN unzip60.orig/unix/unix.c unzip60/unix/unix.c
  #ifdef SCO_XENIX
  #  define SYSNDIR
  #else  /* SCO Unix, AIX, DNIX, TI SysV, Coherent 4.x, ... */
-@@ -1907,3 +1910,44 @@
+@@ -1666,3 +1669,44 @@ static void qlfix(__G__ ef_ptr, ef_len)
      }
  }
  #endif /* QLZIP */
 +
 +
-+char OEM_CP[MAX_CP_NAME] = "CP866";
++char OEM_CP[MAX_CP_NAME] = "";
 +char ISO_CP[MAX_CP_NAME] = "";
 +
 +/* Getr the default value of OEM_CP based on the current locale.
@@ -91,10 +68,10 @@ diff -urN unzip60.orig/unix/unix.c unzip60/unix/unix.c
 +    strncpy(string, buf, FILNAMSIZ);
 +	free (buf);
 +}
-diff -urN unzip60.orig/unix/unxcfg.h unzip60/unix/unxcfg.h
---- unzip60.orig/unix/unxcfg.h	2009-04-17 00:36:12.000000000 +0600
-+++ unzip60/unix/unxcfg.h	2010-06-24 13:48:39.000000000 +0600
-@@ -227,4 +227,30 @@
+diff -pur unzip-5.52-orig/unix/unxcfg.h unzip-5.52/unix/unxcfg.h
+--- unzip-5.52-orig/unix/unxcfg.h	2005-01-05 03:54:22 +0300
++++ unzip-5.52/unix/unxcfg.h	2007-07-30 12:06:17 +0400
+@@ -141,4 +141,30 @@
  /* wild_dir, dirname, wildname, matchname[], dirnamelen, have_dirname, */
  /*    and notfirstcall are used by do_wild().                          */
  
@@ -125,9 +102,9 @@ diff -urN unzip60.orig/unix/unxcfg.h unzip60/unix/unxcfg.h
 +void init_conversion_charsets(void);
 +   
  #endif /* !__unxcfg_h */
-diff -urN unzip60.orig/unzip.c unzip60/unzip.c
---- unzip60.orig/unzip.c	2009-04-17 00:26:52.000000000 +0600
-+++ unzip60/unzip.c	2010-06-24 14:03:18.000000000 +0600
+diff -pur unzip-5.52-orig/unzip.c unzip-5.52/unzip.c
+--- unzip-5.52-orig/unzip.c	2005-02-27 07:37:14 +0300
++++ unzip-5.52/unzip.c	2007-07-30 11:40:28 +0400
 @@ -331,7 +331,9 @@
    -h  print header line       -t  print totals for listed files or for all\n\
    -z  print zipfile comment   -T  print file times in sortable decimal format\
@@ -139,7 +116,17 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
  #ifdef MORE
     static ZCONST char Far ZipInfoUsageLine4[] =
       "  -M  page output through built-in \"more\"\n";
-@@ -673,7 +675,9 @@
+@@ -570,8 +572,7 @@
+ #else /* !VMS */
+ # ifdef COPYRIGHT_CLEAN
+    static ZCONST char Far UnzipUsageLine1[] = "\
+-UnZip %d.%d%d%s of %s, by Info-ZIP.  Maintained by C. Spieler.  Send\n\
+-bug reports using http://www.info-zip.org/zip-bug.html; see README for details.\
++UnZip %d.%d%d%s of %s, by ALT Linux Team.  Original by Info-ZIP.\
+ \n\n";
+ # else
+    static ZCONST char Far UnzipUsageLine1[] = "\
+@@ -673,7 +674,9 @@
    -j  junk paths (do not make directories)   -aa treat ALL files as text\n\
    -U  use escapes for all non-ASCII Unicode  -UU ignore any Unicode fields\n\
    -C  match filenames case-insensitively     -L  make (some) names \
@@ -150,7 +137,7 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
  #endif /* ?VMS */
  #else /* !UNICODE_SUPPORT */
  #ifdef VMS
-@@ -692,7 +696,9 @@
+@@ -692,7 +695,9 @@
    -o  overwrite files WITHOUT prompting      -a  auto-convert any text files\n\
    -j  junk paths (do not make directories)   -aa treat ALL files as text\n\
    -C  match filenames case-insensitively     -L  make (some) names \
@@ -161,9 +148,9 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
  #endif /* ?VMS */
  #endif /* ?UNICODE_SUPPORT */
  
-@@ -803,6 +809,10 @@
- #endif /* UNICODE_SUPPORT */
+@@ -668,6 +690,10 @@ int unzip(__G__ argc, argv)
  
+     SETLOCALE(LC_CTYPE,"");
  
 +#ifdef UNIX
 +    init_conversion_charsets();
@@ -172,7 +159,7 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
  #if (defined(__IBMC__) && defined(__DEBUG_ALLOC__))
      extern void DebugMalloc(void);
  
-@@ -1336,6 +1346,11 @@
+@@ -1089,6 +1115,11 @@ int uz_opts(__G__ pargc, pargv)
      argc = *pargc;
      argv = *pargv;
  
@@ -184,7 +171,7 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
      while (++argv, (--argc > 0 && *argv != NULL && **argv == '-')) {
          s = *argv + 1;
          while ((c = *s++) != 0) {    /* "!= 0":  prevent Turbo C warning */
-@@ -1517,6 +1532,35 @@
+@@ -1252,6 +1283,35 @@ int uz_opts(__G__ pargc, pargv)
                      }
                      break;
  #endif  /* MACOS */
@@ -220,7 +207,7 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
                  case ('j'):    /* junk pathnames/directory structure */
                      if (negative)
                          uO.jflag = FALSE, negative = 0;
-@@ -1592,6 +1636,35 @@
+@@ -1327,6 +1387,35 @@ int uz_opts(__G__ pargc, pargv)
                      } else
                          ++uO.overwrite_all;
                      break;
@@ -256,10 +243,22 @@ diff -urN unzip60.orig/unzip.c unzip60/unzip.c
                  case ('p'):    /* pipes:  extract to stdout, no messages */
                      if (negative) {
                          uO.cflag = FALSE;
-diff -urN unzip60.orig/zipinfo.c unzip60/zipinfo.c
---- unzip60.orig/zipinfo.c	2010-06-24 13:45:19.000000000 +0600
-+++ unzip60/zipinfo.c	2010-06-24 14:06:18.000000000 +0600
-@@ -457,6 +457,10 @@
+diff -pur unzip-5.52-orig/unzpriv.h unzip-5.52/unzpriv.h
+--- unzip-5.52-orig/unzpriv.h	2007-07-30 11:40:15 +0400
++++ unzip-5.52/unzpriv.h	2007-07-30 11:40:28 +0400
+@@ -2564,7 +2566,7 @@ char    *GetLoadPath     OF((__GPRO));  
+          !(((islochdr) || (isuxatt)) && \
+            ((hostver) == 25 || (hostver) == 26 || (hostver) == 40))) || \
+         (hostnum) == FS_HPFS_ || \
+-        ((hostnum) == FS_NTFS_ && (hostver) == 50)) { \
++        ((hostnum) == FS_NTFS_/* && (hostver) == 50*/)) { \
+         _OEM_INTERN((string)); \
+     } else { \
+         _ISO_INTERN((string)); \
+diff -pur unzip-5.52-orig/zipinfo.c unzip-5.52/zipinfo.c
+--- unzip-5.52-orig/zipinfo.c	2005-01-27 04:02:16 +0300
++++ unzip-5.52/zipinfo.c	2007-07-30 11:40:28 +0400
+@@ -447,6 +447,10 @@ int zi_opts(__G__ pargc, pargv)
      int    tflag_slm=TRUE, tflag_2v=FALSE;
      int    explicit_h=FALSE, explicit_t=FALSE;
  
@@ -270,7 +269,7 @@ diff -urN unzip60.orig/zipinfo.c unzip60/zipinfo.c
  
  #ifdef MACOS
      uO.lflag = LFLAG;         /* reset default on each call */
-@@ -501,6 +505,35 @@
+@@ -491,6 +495,35 @@ int zi_opts(__G__ pargc, pargv)
                              uO.lflag = 0;
                      }
                      break;
@@ -306,7 +305,7 @@ diff -urN unzip60.orig/zipinfo.c unzip60/zipinfo.c
                  case 'l':      /* longer form of "ls -l" type listing */
                      if (negative)
                          uO.lflag = -2, negative = 0;
-@@ -521,6 +554,35 @@
+@@ -511,6 +544,35 @@ int zi_opts(__G__ pargc, pargv)
                          G.M_flag = TRUE;
                      break;
  #endif
@@ -342,15 +341,3 @@ diff -urN unzip60.orig/zipinfo.c unzip60/zipinfo.c
                  case 's':      /* default:  shorter "ls -l" type listing */
                      if (negative)
                          uO.lflag = -2, negative = 0;
-
---- unzip60.orig/extract.c	2009-04-17 00:26:52.000000000 +0600
-+++ unzip60/extract.c	2010-06-24 14:03:18.000000000 +0600
-@@ -2593,7 +2593,7 @@
-      */
- #   define UZ_FNFILTER_REPLACECHAR      '?'
- # endif
--        if (!isprint(*r)) {
-+        if ((!isprint(*r)) && (*r < 128)) {
-             if (*r < 32) {
-                 /* ASCII control codes are escaped as "^{letter}". */
-                 if (se != NULL && (s > (space + (size-4)))) {

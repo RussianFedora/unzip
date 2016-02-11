@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 21%{?dist}
+Release: 23%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -36,11 +36,13 @@ Patch14: unzip-6.0-cve-2014-8139.patch
 Patch15: unzip-6.0-cve-2014-8140.patch
 Patch16: unzip-6.0-cve-2014-8141.patch
 Patch17: unzip-6.0-overflow-long-fsize.patch
-# Details in rhbz#225576 RFE: handle non-ascii filenames in archive properly
-Patch50: unzip-6.0-non-ascii-filenames.patch
+# Fix heap overflow and infinite loop when invalid input is given (#1260947)
+Patch18: unzip-6.0-heap-overflow-infloop.patch
+# Fix various encoding
+Patch50: unzip-6.0-alt-natspec.patch
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
-BuildRequires:  libnatspec-devel
+BuildRequires:	pkgconfig(libnatspec)
 
 %description
 The unzip utility is used to list, test, or extract files from a zip
@@ -72,7 +74,8 @@ a zip archive.
 %patch15 -p1 -b .cve-2014-8140
 %patch16 -p1 -b .cve-2014-8141
 %patch17 -p1 -b .overflow-long-fsize
-%patch50 -p1 -b .non-ascii-filenames
+%patch18 -p1 -b .heap-overflow-infloop
+%patch50 -p1 -b .natspec
 
 %build
 # IZ_HAVE_UXUIDGID is needed for right functionality of unzip -X
@@ -91,9 +94,14 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
-* Thu Jun  4 2015 Ivan Romanov <drizt@land.ru> - 6.0-21.R
-- added unzip-6.0-non-ascii-filenames patch
-- libnatspec-devel in BR
+* Thu Feb 11 2016 Arkady L. Shane <ashejn@russianfedora.pro> - 6.0-23.R
+- rebuilt with libnatspec support
+
+* Mon Nov 23 2015 Petr Stodulka <pstodulk@redhat.com> - 6.0-23
+- add fixed security update for #1260944 (#1281804)
+
+* Mon Sep 14 2015 Kamil Dudka <kdudka@redhat.com> - 6.0-22
+- Fix heap overflow and infinite loop when invalid input is given (#1260947)
 
 * Sat Feb 21 2015 Till Maas <opensource@till.name> - 6.0-21
 - Rebuilt for Fedora 23 Change
