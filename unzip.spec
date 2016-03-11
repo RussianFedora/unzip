@@ -39,7 +39,7 @@ Patch17: unzip-6.0-overflow-long-fsize.patch
 # Fix heap overflow and infinite loop when invalid input is given (#1260947)
 Patch18: unzip-6.0-heap-overflow-infloop.patch
 # Fix various encoding
-Patch50: unzip-6.0-alt-natspec.patch
+Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
 BuildRequires:	pkgconfig(libnatspec)
