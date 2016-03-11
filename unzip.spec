@@ -1,7 +1,7 @@
 Summary: A utility for unpacking zip files
 Name: unzip
 Version: 6.0
-Release: 23%{?dist}
+Release: 23.1%{?dist}
 License: BSD
 Group: Applications/Archiving
 Source: http://downloads.sourceforge.net/infozip/unzip60.tar.gz
@@ -39,7 +39,7 @@ Patch17: unzip-6.0-overflow-long-fsize.patch
 # Fix heap overflow and infinite loop when invalid input is given (#1260947)
 Patch18: unzip-6.0-heap-overflow-infloop.patch
 # Fix various encoding
-Patch50: unzip-6.0-alt-natspec.patch
+Patch50: unzip-6.0-non-ascii-filenames.patch
 URL: http://www.info-zip.org/UnZip.html
 BuildRequires:  bzip2-devel
 BuildRequires:	pkgconfig(libnatspec)
@@ -81,7 +81,11 @@ a zip archive.
 # IZ_HAVE_UXUIDGID is needed for right functionality of unzip -X
 # NOMEMCPY solve problem with memory overlapping - decomression is slowly,
 # but successfull.
-make -f unix/Makefile CF_NOOPT="-I. -DUNIX $RPM_OPT_FLAGS -DNOMEMCPY -DIZ_HAVE_UXUIDGID" generic_gcc %{?_smp_mflags}
+%ifarch %{ix86}
+make -ef unix/Makefile linux CF="%{optflags} -D_FILE_OFFSET_BITS=64 -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD -DDATE_FORMAT=DF_YMD -DNATIVE -Wall -I. -DASM_CRC" CC=gcc LD=gcc AS=gcc AF="-Di386" CRC32=crc_gcc %{?_smp_mflags}
+%else
+make -ef unix/Makefile linux_noasm CF="%{optflags} -D_FILE_OFFSET_BITS=64 -DACORN_FTYPE_NFS -DWILD_STOP_AT_DIR -DLARGE_FILE_SUPPORT -DUNICODE_SUPPORT -DUNICODE_WCHAR -DUTF8_MAYBE_NATIVE -DNO_LCHMOD -DDATE_FORMAT=DF_YMD -DNATIVE -Wall -I." %{?_smp_mflags}
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -94,6 +98,10 @@ make -f unix/Makefile prefix=$RPM_BUILD_ROOT%{_prefix} MANDIR=$RPM_BUILD_ROOT/%{
 %{_mandir}/*/*
 
 %changelog
+* Fri Mar 11 2016 Arkady L. Shane <ashejn@russianfedora.pro> - 6.0-23.1.R
+- update natspec patch
+- change build options
+
 * Thu Feb 11 2016 Arkady L. Shane <ashejn@russianfedora.pro> - 6.0-23.R
 - rebuilt with libnatspec support
 
